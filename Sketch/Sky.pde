@@ -1,6 +1,6 @@
 PImage sun, moon;
 
-float solarDuration = 86400; //Seconds in 24 hours
+float solarDuration = 20000;//86400; //Seconds in 24 hours
 float solarElapsed = 0; //Time elapsed each cycle
 
 //Set colours for each period of the day (array of colours[top,bottom])
@@ -11,8 +11,44 @@ color[] sunriseSky = {color(236, 154, 202), color(236, 155, 48)};
 
 color currentSky;
 
+//Dates for the range (November 11 to November 17)
+int startDay = 11;
+int endDay = 17;
+
+//Display date
+void displayDate(int currentDay) {
+    textSize(15);
+    text("November " + currentDay, 60, 175);
+    fill(0, 0, 0);
+}
+
+//Display time
+void displayTime(String timeString) {
+    textSize(15);
+    text(timeString, 60, 200);
+    fill(0, 0, 0);
+}
+
 void drawSky() {
   solarElapsed = (millis() % solarDuration) / solarDuration; //Calculate the current time in the solar cycle (0 to 1)
+  
+  //Map the solarElapsed value (0 to 1) to a specific date in the range
+  int currentDay = int(map(solarElapsed, 0, 1, startDay, endDay));
+
+  //Offset time by 12 hours
+  float offsetSolarElapsed = solarElapsed + 0.5;
+  //Wraps around within range 0 to 1
+  if (offsetSolarElapsed >= 1) {
+    offsetSolarElapsed -= 1;
+  }
+
+  //Map solarElapsed to hours, minutes, and seconds
+  int hours = int(map(solarElapsed, 0, 1, 0, 24));  //Map to hours (0 to 23)
+  int minutes = int(map(solarElapsed, 0, 1, 0, 60)); //Map to minutes (0 to 59)
+  int seconds = int(map(solarElapsed, 0, 1, 0, 60)); //Map to seconds (0 to 59)
+
+  //Format time as HH:MM:SS (24-hour format)
+  String timeString = nf(hours, 2) + ":" + nf(minutes, 2) + ":" + nf(seconds, 2);
   
   color[] grad_from, grad_to; //Define periods of the day and smoothly transition between states
   
@@ -39,7 +75,7 @@ void drawSky() {
   }
   
   //Interpolate top and bottom sky colors for smooth transition
-  float phaseProgress = (solarElapsed % 0.25) / 0.25; // Normalize phase progress (0 to 1)
+  float phaseProgress = (solarElapsed % 0.25) / 0.25; //Normalize phase progress (0 to 1)
   
   color grad_col_top = lerpColor(grad_from[0], grad_to[0], phaseProgress);
   color grad_col_bottom = lerpColor(grad_from[1], grad_to[1], phaseProgress);
@@ -55,14 +91,17 @@ void drawSky() {
   filter(POSTERIZE, 100); //filter
   
   celestialBodies();
+  
+  displayDate(currentDay);
+  displayTime(timeString);
 }
 
 void celestialBodies() {
   //Orbital parameters
-  float centerX = width / 2; //Centre of orbit
-  float centerY = height / 1.75; //Max height of orbit
-  float posX = width / 1.7; // Horizontal radius determining position of celestial body
-  float posY = height / 2.75; // Vertical radius determining position of celestial body
+  float centerX = 500; //Centre of orbit
+  float centerY = 550; //Height of orbit (where it starts)
+  float posX = 700; //Horizontal radius determining position of celestial body
+  float posY = 450; //Vertical radius determining position of celestial body
   
   //Calculate orbital position using solarElapsed
   float angle = TWO_PI * solarElapsed; //Angle of orbit about centre points in radians (0 to 2π)
@@ -77,17 +116,18 @@ void celestialBodies() {
   
   //Draw sun with rotation
   if (solarElapsed < 0.5) {
-    imageMode(CENTER);
     pushMatrix();
-    translate(sunX, sunY); // Move origin to the sun's position
-    rotate(angle); // Rotate the sun image based on the angle
-    image(sun, 0, 0, 200, 200); // Draw the sun at the new origin
+    translate(sunX, sunY); //Move origin to the sun's position
+    rotate(angle); //Rotate the sun image based on the angle
+    image(sun, 0, 0, 200, 200); //Draw the sun at the new origin
     popMatrix();
   }
   
   //Draw moon
   if (solarElapsed >= 0.5) {
-    imageMode(CENTER);
-    image(moon, moonX, moonY, 130, 130);
+    pushMatrix();
+    translate(moonX, moonY); //Move origin to the moon's position
+    image(moon, 0, 0, 130, 130);
+    popMatrix();
   }
 }

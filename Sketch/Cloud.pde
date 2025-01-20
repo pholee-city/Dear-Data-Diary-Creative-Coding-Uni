@@ -9,8 +9,8 @@ class Cloud {
     this.cloud = img;
     
     //Initialises state of cloud with random values
-    x = random(1274, 3000);
-    y = random(50, 250);
+    x = random(1275, 3000);
+    y = random(50, 200);
     
     //Checks if image name is cloud1 or cloud2 and adjusts speed accordingly
     if (cloud == cloud1) {
@@ -25,9 +25,9 @@ class Cloud {
   }
   
    void move() {
-    x -= speed; // Move the cloud horizontally
+    x -= speed; //Move the cloud horizontally
     if (x < -300) {
-      x = width + 300; // Reset to the right side if it goes offscreen
+      x = width + 300; //Reset to the right side if it goes offscreen
     }
   }
 }
