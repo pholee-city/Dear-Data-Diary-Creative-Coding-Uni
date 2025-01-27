@@ -1,18 +1,21 @@
 PFont font;
 PImage line;
-boolean isAnimating = false;
-String string = "Click me to play an animation!";
+
+boolean screenAnimation = false;
+boolean screenSun = false;
+boolean screenSleep = false;
+boolean screenTravel = false;
 
 Cloud[] clouds; //Initialise array of clouds
 
 void setup() {
   size(1024, 700);
   
-  // Text font
+  //Text font
   font = createFont("Margarine-Regular.ttf", 20);
   textFont(font);
   
-  // Load the images
+  //Load the images
   line = loadImage("Line.png");
   cloud1 = loadImage("Cloud1.png");
   cloud2 = loadImage("Cloud2.png");
@@ -22,10 +25,8 @@ void setup() {
   moon = loadImage("Moon.png");
   sprite = loadImage("Sprite.png");
   speechBubble = loadImage("Speech bubble.png");
-  train1 = loadImage("Train1.png");
-  train2 = loadImage("Train2.png");
 
-  // Initialize the clouds
+  //Initialize the clouds
   int numClouds = int(random(1, 7)); //Randomises number of clouds each time the program is run between 1 and 7
   clouds = new Cloud[numClouds]; //Creates array of clouds
   
@@ -38,42 +39,36 @@ void setup() {
       clouds[i] = new Cloud(cloud2);
     }
   }
-}
+  
+  //Read from file into original array
+  String[] textLines = loadStrings("A week in my life.txt");
+  
+  //Create separate arrays for specific data
+  dates = new int[textLines.length];
+  sunSet = new String[textLines.length];
+  sunRise = new String[textLines.length];
+  wakeUp = new String[textLines.length];
+  sleep = new String[textLines.length];
+  trainOut = new String[textLines.length];
+  trainHome = new String[textLines.length];
 
-//If different items on screen clicked, make things happen
-void mousePressed() {
-  //Sprite plays animation
-  if (mouseX > 50 && mouseX < spriteWidth && mouseY > 500 && mouseY < height-35) {
-    isAnimating = !isAnimating;
-    string = "Click me to return to the launch page.";
-  }
-  //Menu1 shows schedule
-  //Menu2 shows schedule
-  //Menu3 shows schedule
-  //Speed up animation
-  //Slow down animation
-  //Pause animation
-}
-
-//Create menu background
-void drawGradientRect(float x, float y, float w, float h, color c1, color c2) {
-  noFill();
-  for (int i = 0; i < w; i++) {
-    // Interpolate between c1 and c2
-    float lerpFactor = map(i, 0, w, 0, 1);
-    color interColor = lerpColor(c1, c2, lerpFactor);
-    stroke(interColor);
-    line(x + i, y, x + i, y + h);
+  //Iterate through original array and store like data in separate arrays
+  for (int i=1; i<textLines.length; i=i+1) {
+    
+    String[] values = split(textLines[i], ","); //Split line by comma
+   
+    dates[i] = int(values[0]); 
+    sunRise[i] = values[1];
+    sunSet[i] = values[2];
+    wakeUp[i] = values[3];
+    sleep[i] = values[4];
+    trainOut[i] = values[5];
+    trainHome[i] = values[6];
   }
 }
 
 void draw() {
   background(207,226,243);
-  
-  for (Cloud cloud : clouds) {
-    cloud.display();
-    cloud.move();
-  }
   
   //Title
   textSize(65);
@@ -83,51 +78,70 @@ void draw() {
   
   //Menu item 1.1
   textSize(20);
+  fill(0, 0, 0); 
   text("Sunset/ Sunrise times", 60, 200);
-  fill(0, 0, 0);
   //If menu item is hovered over, make interactable
-  boolean menu11IsHovered = mouseX > 50 && mouseX < 300 && mouseY > 170 && mouseY < 215;
+  boolean menu11IsHovered = mouseX > 50 && mouseX < 270 && mouseY > 170 && mouseY < 215 && !screenAnimation;
   if (menu11IsHovered) {
-    drawGradientRect(50, 170, 260, 45, color(255, 255, 255, 200), color(255, 255, 255, 0));
-    text("Sunset/ Sunrise times", 60, 200);
+    noStroke();
+    circle(45, 192.5, 7);
     fill(0, 0, 0);
   }
   
   //Menu item 1.2
-  textSize(20);   
-  text("Sleep Schedule", 60, 245);
-  fill(0, 0, 0);  
+  textSize(20); 
+  fill(0, 0, 0); 
+  text("Sleep Schedule", 60, 245); 
   //If menu item is hovered over, make interactable
-  boolean menu12IsHovered = mouseX > 50 && mouseX < 300 && mouseY > 215 && mouseY < 260;
+  boolean menu12IsHovered = mouseX > 50 && mouseX < 270 && mouseY > 215 && mouseY < 260 && !screenAnimation;
   if (menu12IsHovered) {
-    drawGradientRect(50, 215, 260, 45, color(255, 255, 255, 200), color(255, 255, 255, 0));
-    text("Sleep Schedule", 60, 245);
+    noStroke();
+    circle(45, 237.5, 7);
     fill(0, 0, 0);
   }
-  
+
   //Menu item 1.3
   textSize(20);
-  text("Travel", 60, 290);
-  fill(0, 0, 0);  
+  fill(0, 0, 0);
+  text("Travel", 60, 290);  
   //If menu item is hovered over, make interactable
-  boolean menu13IsHovered = mouseX > 50 && mouseX < 300 && mouseY > 260 && mouseY < 305;
+  boolean menu13IsHovered = mouseX > 50 && mouseX < 270 && mouseY > 260 && mouseY < 305 && !screenAnimation;
   if (menu13IsHovered) {
-    drawGradientRect(50, 260, 260, 45, color(255, 255, 255, 200), color(255, 255, 255, 0));    
-    text("Travel", 60, 290);
+    noStroke();
+    circle(45, 282.5, 7);
     fill(0, 0, 0);
   }
   
   interactiveButton();
   drawEye();
-  
-  //Play animation when sprite clicked
-  if (isAnimating) {
+ 
+  //Show sunset/rise schedule when menu 1.1 clicked
+  if (screenSun) {
+    screenSunData();
+  }
+  //Show sleep schedule when menu 1.2 clicked
+  if (screenSleep) {
+    screenSleepData();
+  }
+  //Show travel schedule when menu 1.3 clicked
+  if (screenTravel) {
+    screenTravelData();
+  }
+  //Switch to animation screen when sprite clicked
+  if (screenAnimation) {
+    drawAnimation();
     
-    drawSky();
-    
+    //If unpaused, update animation variables
+    if (isAnimating) {
+      timeElapsed = millis() - startAnimationTime;
+      solarElapsed = (timeElapsed % solarDuration) / solarDuration;
+    }
+        
     for (Cloud cloud : clouds) {
       cloud.display();
-      cloud.move();
+      if (isAnimating) {
+        cloud.move(); // Only move the clouds when the animation is running
+      }
     }
     
     //Title
@@ -135,9 +149,107 @@ void draw() {
     text("Options", 50, 115);
     fill(0, 0, 0);
     image(line, 42, 140, 250, 10);
-  
+    
+    //Menu item 2.1
+    textSize(15);
+    if (isAnimating) {
+      text("Pause", 60, 175);
+    } else {
+      text("Play", 60, 175);
+    }
+    fill(0, 0, 0);
+    //If menu item is hovered over, make interactable
+    boolean menu21IsHovered = mouseX > 50 && mouseX < 105 && mouseY > 155 && mouseY < 185 && screenAnimation;
+    if (menu21IsHovered) {
+      noStroke();
+      circle(47, 170, 5);
+      fill(0, 0, 0);
+    }
+    
+    //Menu item 2.2
+    textSize(15);
+    text(">> / <<", 60, 200);
+    fill(0, 0, 0);
+    //If menu item is hovered over, make interactable
+    boolean menu22IsHovered = mouseX > 50 && mouseX < 105 && mouseY > 185 && mouseY < 210 && screenAnimation;
+    if (menu22IsHovered) {
+      noStroke();
+      circle(47, 195, 5);
+      fill(0, 0, 0);
+    }
+    
+    displayDate(currentDay);
+    displayTime(timeString);
     interactiveButton();
     drawEye();
-    
+      
+  } else {
+    //Reset when not animating
+    solarElapsed = 0;
+  }
+}
+
+//If different items on screen clicked, make things happen
+void mousePressed() {
+  //Sprite plays animation
+  if (mouseX > 50 && mouseX < spriteWidth && mouseY > 500 && mouseY < height-35) {
+    screenAnimation = !screenAnimation;
+    screenSun = false;
+    screenSleep = false;
+    screenTravel = false;
+    interactiveButton();
+  }
+  //Menu1.1 shows sunset/rise schedule
+  if (mouseX > 50 && mouseX < 300 && mouseY > 170 && mouseY < 215 && !screenAnimation) {
+    screenSun = !screenSun;
+    screenSleep = false;
+    screenTravel = false;
+  }
+  //Menu1.2 shows sleep schedule
+  if (mouseX > 50 && mouseX < 300 && mouseY > 215 && mouseY < 260 && !screenAnimation) {
+    screenSun = false;
+    screenSleep = !screenSleep;
+    screenTravel = false;
+  }
+  //Menu1.3 shows travel schedule
+  if (mouseX > 50 && mouseX < 300 && mouseY > 260 && mouseY < 305 && !screenAnimation) {
+    screenSun = false;
+    screenSleep = false;
+    screenTravel = !screenTravel;
+  }
+  //Menu2.1 pauses animation
+  if (mouseX > 50 && mouseX < 100 && mouseY > 155 && mouseY < 185 && screenAnimation) {
+    isAnimating = !isAnimating;
+    if (isAnimating) {
+      //Resuming animation: update start time to maintain animation continuity
+      startAnimationTime = millis() - solarElapsed * solarDuration;
+    } else {
+      //Pausing animation: calculate elapsed time to freeze animation state
+      solarElapsed = (millis() - startAnimationTime) / solarDuration;
+    }
+  }
+  //Menu2.2 speeds up animation
+  if (mouseX > 50 && mouseX < 78 && mouseY > 185 && mouseY < 215 && isAnimating) {
+    if (solarDuration > 10000) {
+      float currentProgress = (millis() - startAnimationTime) / solarDuration;
+      solarDuration = solarDuration/1.5;
+      startAnimationTime = millis() - currentProgress * solarDuration;
+      //Update cloud speeds
+      for (Cloud cloud : clouds) {
+        cloud.updateSpeed();
+      }
+    }
+  }
+  //Menu 2.2 slows down animation
+  if (mouseX > 80 && mouseX < 105 && mouseY > 180 && mouseY < 210 && isAnimating) {
+    if (solarDuration < 86400) {
+      float currentProgress = (millis() - startAnimationTime) / solarDuration;
+      solarDuration = solarDuration*1.5;
+      startAnimationTime = millis() - currentProgress * solarDuration;
+      //Update cloud speeds
+      for (Cloud cloud : clouds) {
+        cloud.updateSpeed();
+      }
+    }
   }
 }

@@ -1,7 +1,11 @@
 PImage sun, moon;
 
-float solarDuration = 20000;//86400; //Seconds in 24 hours
+boolean isAnimating = false;
+
+float solarDuration = 86400; //Seconds in 24 hours
 float solarElapsed = 0; //Time elapsed each cycle
+float startAnimationTime = 0; //Time when the animation starts
+float timeElapsed = 0; //Time since animation has started
 
 //Set colours for each period of the day (array of colours[top,bottom])
 color[] daySky = {color(142, 191, 255), color(220, 240, 255)};
@@ -11,44 +15,51 @@ color[] sunriseSky = {color(236, 154, 202), color(236, 155, 48)};
 
 color currentSky;
 
-//Dates for the range (November 11 to November 17)
+//Dates for the range (November 11 to November 17) & time
 int startDay = 11;
 int endDay = 17;
+int currentDay = 11;
+float startElapsed = 6;
+float dayElapsed = 0;
+String timeString = "";
 
 //Display date
 void displayDate(int currentDay) {
     textSize(15);
-    text("November " + currentDay, 60, 175);
+    text("November " + currentDay, 60, 225);
     fill(0, 0, 0);
 }
 
 //Display time
 void displayTime(String timeString) {
     textSize(15);
-    text(timeString, 60, 200);
+    text(timeString, 60, 250);
     fill(0, 0, 0);
 }
 
-void drawSky() {
-  solarElapsed = (millis() % solarDuration) / solarDuration; //Calculate the current time in the solar cycle (0 to 1)
-  
-  //Map the solarElapsed value (0 to 1) to a specific date in the range
-  int currentDay = int(map(solarElapsed, 0, 1, startDay, endDay));
-
-  //Offset time by 12 hours
-  float offsetSolarElapsed = solarElapsed + 0.5;
-  //Wraps around within range 0 to 1
-  if (offsetSolarElapsed >= 1) {
-    offsetSolarElapsed -= 1;
+void drawAnimation() { 
+  //Map solarElapsed to hours and minutes
+  dayElapsed = startElapsed + (solarElapsed * 24); //Scale to 24-hour clock
+  if (dayElapsed > 24) { //Reset to 0 if beyond 24hrs
+    dayElapsed = (solarElapsed * 24) - 18; //Scale to 24-hour clock
   }
+  
+  int hours = int(dayElapsed); //Hours
+  int minutes = int((dayElapsed - hours) * 60); //Minutes
+  
+  //Format time as HH:MM:SS
+  timeString = nf(hours, 2) + ":" + nf(minutes, 2);
 
-  //Map solarElapsed to hours, minutes, and seconds
-  int hours = int(map(solarElapsed, 0, 1, 0, 24));  //Map to hours (0 to 23)
-  int minutes = int(map(solarElapsed, 0, 1, 0, 60)); //Map to minutes (0 to 59)
-  int seconds = int(map(solarElapsed, 0, 1, 0, 60)); //Map to seconds (0 to 59)
-
-  //Format time as HH:MM:SS (24-hour format)
-  String timeString = nf(hours, 2) + ":" + nf(minutes, 2) + ":" + nf(seconds, 2);
+  // Detect when solarElapsed wraps from near 1.0 back to 0.0
+  if (dayElapsed < 0.01 && solarDuration > 43200) { 
+    currentDay ++; 
+  } else if (dayElapsed < 0.1 && solarDuration < 43200) { 
+    currentDay ++; 
+  }
+  
+  if (currentDay > endDay) { //Reset to startDay if beyond endDay
+    currentDay = startDay;
+  }
   
   color[] grad_from, grad_to; //Define periods of the day and smoothly transition between states
   
@@ -60,16 +71,13 @@ void drawSky() {
   if (solarElapsed < 0.25) {
     grad_from = sunriseSky;
     grad_to = daySky;
-  }
-  else if (solarElapsed < 0.5) {
+  } else if (solarElapsed < 0.5) {
     grad_from = daySky;
     grad_to = sunsetSky;
-  }
-  else if (solarElapsed < 0.75) {
+  } else if (solarElapsed < 0.75) {
     grad_from = sunsetSky;
     grad_to = nightSky;
-  }
-  else {
+  } else {
     grad_from = nightSky;
     grad_to = sunriseSky;
   }
@@ -91,9 +99,6 @@ void drawSky() {
   filter(POSTERIZE, 100); //filter
   
   celestialBodies();
-  
-  displayDate(currentDay);
-  displayTime(timeString);
 }
 
 void celestialBodies() {

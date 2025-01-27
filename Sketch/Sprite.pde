@@ -1,4 +1,5 @@
 PImage sprite, speechBubble;
+String string = "Click me to play an animation!";
 
 float spriteWidth = 200; //Image width
 float spriteHeight = 200; //Image height
@@ -17,5 +18,12 @@ void interactiveButton() {
     textSize(16);
     text(string, spriteX+225, spriteY+50, 120, 100);
     fill(0, 0, 0);
+  }
+  
+  //If clicked, change text
+  if (screenAnimation) {
+    string = "Click me to return to the launch page.";
+  } else {
+    string = "Click me to play an animation!";
   }
 }

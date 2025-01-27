@@ -12,11 +12,16 @@ class Cloud {
     x = random(1275, 3000);
     y = random(50, 200);
     
-    //Checks if image name is cloud1 or cloud2 and adjusts speed accordingly
+    //Initial speed
+    updateSpeed();
+  }
+  
+  //Checks if image name is cloud1 or cloud2 and adjusts speed accordingly
+  void updateSpeed() {
     if (cloud == cloud1) {
-      speed = 0.75*(solarDuration/86400);
+      speed = 0.75 * (86400 / solarDuration);
     } else {
-      speed = 0.5*(solarDuration/86400);
+      speed = 0.5 * (86400 / solarDuration);
     }
   }
 
