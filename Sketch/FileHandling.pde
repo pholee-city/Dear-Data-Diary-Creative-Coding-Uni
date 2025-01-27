@@ -14,7 +14,7 @@ void screenSunData() {
   int x = 450; //Start x-coordinates for collumns
   int y = 250; //Start y-coordinate for rows
 
-  // Table headers
+  //Table headers
   text("Date", x, y);
   text("Sunrise", x+110, y);
   text("Sunset", x+220, y);
@@ -46,7 +46,7 @@ void screenSleepData() {
   int x = 450; //Start x-coordinates for collumns
   int y = 250; //Start y-coordinate for rows
 
-  // Table headers
+  //Table headers
   text("Date", x, y);
   text("Slept", x+110, y);
   text("Woke", x+220, y);
@@ -78,7 +78,7 @@ textSize(20);
   int x = 450; //Start x-coordinates for collumns
   int y = 250; //Start y-coordinate for rows
 
-  // Table headers
+  //Table headers
   text("Date", x, y);
   text("Train out", x+110, y);
   text("Train home", x+220, y);
@@ -110,7 +110,7 @@ int calculateDuration(String startTime, String endTime) {
   String[] endParts = split(endTime, ":");
 
   if (startParts.length < 2 || endParts.length < 2) {
-    return 0; // Return 0 if time format is invalid
+    return 0; //Return 0 if time format is invalid
   }
   
   int startHours = int(startParts[0]);

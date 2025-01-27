@@ -2,6 +2,7 @@ PFont font;
 PImage line;
 
 boolean screenAnimation = false;
+boolean isAnimating = false;
 boolean screenSun = false;
 boolean screenSleep = false;
 boolean screenTravel = false;
@@ -129,7 +130,6 @@ void draw() {
   }
   //Switch to animation screen when sprite clicked
   if (screenAnimation) {
-    drawAnimation();
     
     //If unpaused, update animation variables
     if (isAnimating) {
@@ -137,6 +137,8 @@ void draw() {
       solarElapsed = (timeElapsed % solarDuration) / solarDuration;
     }
         
+    drawAnimation();
+    
     for (Cloud cloud : clouds) {
       cloud.display();
       if (isAnimating) {
@@ -186,6 +188,8 @@ void draw() {
   } else {
     //Reset when not animating
     solarElapsed = 0;
+    currentDay = startDay;
+    isAnimating = false;
   }
 }
 
@@ -194,6 +198,9 @@ void mousePressed() {
   //Sprite plays animation
   if (mouseX > 50 && mouseX < spriteWidth && mouseY > 500 && mouseY < height-35) {
     screenAnimation = !screenAnimation;
+    for (Cloud cloud : clouds) {
+      cloud.reset();
+    }
     screenSun = false;
     screenSleep = false;
     screenTravel = false;
@@ -221,11 +228,11 @@ void mousePressed() {
   if (mouseX > 50 && mouseX < 100 && mouseY > 155 && mouseY < 185 && screenAnimation) {
     isAnimating = !isAnimating;
     if (isAnimating) {
-      //Resuming animation: update start time to maintain animation continuity
-      startAnimationTime = millis() - solarElapsed * solarDuration;
+        // Resuming animation: calculate the start time based on the stored solarElapsed
+        startAnimationTime = millis() - solarElapsed * solarDuration;
     } else {
-      //Pausing animation: calculate elapsed time to freeze animation state
-      solarElapsed = (millis() - startAnimationTime) / solarDuration;
+        // Pausing animation: store the current elapsed time as a fraction
+        solarElapsed = ((millis() - startAnimationTime) % solarDuration) / solarDuration;
     }
   }
   //Menu2.2 speeds up animation

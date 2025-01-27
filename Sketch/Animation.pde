@@ -1,7 +1,5 @@
 PImage sun, moon;
 
-boolean isAnimating = false;
-
 float solarDuration = 86400; //Seconds in 24 hours
 float solarElapsed = 0; //Time elapsed each cycle
 float startAnimationTime = 0; //Time when the animation starts
@@ -38,6 +36,7 @@ void displayTime(String timeString) {
 }
 
 void drawAnimation() { 
+  
   //Map solarElapsed to hours and minutes
   dayElapsed = startElapsed + (solarElapsed * 24); //Scale to 24-hour clock
   if (dayElapsed > 24) { //Reset to 0 if beyond 24hrs
@@ -50,10 +49,10 @@ void drawAnimation() {
   //Format time as HH:MM:SS
   timeString = nf(hours, 2) + ":" + nf(minutes, 2);
 
-  // Detect when solarElapsed wraps from near 1.0 back to 0.0
+  //Detect when solarElapsed wraps from near 1.0 back to 0.0
   if (dayElapsed < 0.01 && solarDuration > 43200) { 
     currentDay ++; 
-  } else if (dayElapsed < 0.1 && solarDuration < 43200) { 
+  } else if (dayElapsed < 0.09 && solarDuration < 43200) { 
     currentDay ++; 
   }
   

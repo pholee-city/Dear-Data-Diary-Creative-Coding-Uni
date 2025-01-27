@@ -16,6 +16,12 @@ class Cloud {
     updateSpeed();
   }
   
+   void reset() {
+    x = random(1275, 3000); //Reset x position
+    y = random(50, 200); //Reset y position
+    updateSpeed(); //Reset speed
+  }
+  
   //Checks if image name is cloud1 or cloud2 and adjusts speed accordingly
   void updateSpeed() {
     if (cloud == cloud1) {
